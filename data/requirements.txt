@@ -1,0 +1,9 @@
+Pillow
+requests
+tqdm
+open_clip_torch
+git+https://github.com/huggingface/transformers.git
+git+https://github.com/theovercomer8/BLIP
+--extra-index-url https://download.pytorch.org/whl/cu117
+torch
+torchvision
