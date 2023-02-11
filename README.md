@@ -19,7 +19,13 @@ COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 `pip install -r requirements.txt`
 
 - Execute
+
+Sample arguments that will execute a GIT pass, followed by Coca if the fail phrases are triggered, and append CLIP flavors to multiple datasets designed for a SD 2.x model:
+
+`python captionr/captionr.py e:\data\set1 e:\data\set2 --existing=skip --cap_length=300 --git_pass --coca_pass --model_order='git,coca' --clip_model_name=ViT-H-14/laion2b_s32b_b79k --clip_flavor --clip_max_flavors=32 --clip_method=interrogate_fast --fail_phrases="a sign that says,writing that says,that says,with the word" --uniquify_tags --prepend_text="a photo of " --device=cuda --extension=txt`
+
 `python captionr/captionr.py --help`
+
 ```usage: Captionr [OPTIONS] [FOLDER]...
 
 Caption a set of images
