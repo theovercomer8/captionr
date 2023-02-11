@@ -1,1 +1,0 @@
-from captionr.captionr_class import Captionr, CaptionrConfig
