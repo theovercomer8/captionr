@@ -5,12 +5,13 @@ from dataclasses import dataclass
 from PIL import Image
 import os
 from captionr.blip_cap import BLIP
+from captionr.blip2_cap import BLIP2
 from captionr.clip_interrogator import Interrogator, Config
 from captionr.coca_cap import Coca
 from captionr.git_cap import Git
-from tqdm import tqdm
 from captionr.captionr_class import CaptionrConfig, Captionr
-
+from tqdm import tqdm
+import torch
 
 config:CaptionrConfig = None
 
@@ -60,6 +61,12 @@ def init_argparse() -> argparse.ArgumentParser:
                         help='Perform captioning/fallback using this order (default: coca,git,blip)',
                         default='coca,git,blip',
                         )
+    parser.add_argument('--use_blip2',
+                        help='Uses BLIP2 for BLIP pass. Only activated when --blip_pass also specified',
+                        action='store_true')
+    parser.add_argument('--blip2_model',
+                        help='Specify the BLIP2 model to use',
+                        choices=['blip2_t5/pretrain_flant5xxl','blip2_opt/pretrain_opt2.7b', 'blip2_opt/pretrain_opt6.7b', 'blip2_opt/caption_coco_opt2.7b', 'blip2_opt/aption_coco_opt6.7b', 'blip2_t5/pretrain_flant5xl', 'blip2_t5/caption_coco_flant5xl'])
     parser.add_argument('--blip_beams',
                         help='Number of BLIP beams (default: 64)',
                         default=64,
@@ -239,7 +246,10 @@ def main() -> None:
 
     if config.blip_pass:
         logging.info("Loading BLIP Model...")
-        config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
+        if config.use_blip2:
+            config._blip = BLIP2(config.device,model_name=config.blip2_model,max_length=config.cap_length)
+        else:
+            config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
 
     if config.clip_artist or config.clip_flavor or config.clip_medium or config.clip_movement or config.clip_trending:
         logging.info("Loading Clip Model...")
