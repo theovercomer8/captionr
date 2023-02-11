@@ -185,7 +185,8 @@ class Captionr:
                 for tag in existing_tags:
                     unique_tags.append(tag.strip())
 
-            unique_tags.remove('')
+            if '' in unique_tags:
+                unique_tags.remove('')
             logging.debug(f'Unique tags: {unique_tags}')
             # Construct new caption from tag list
             caption_txt = ", ".join(unique_tags)
@@ -217,3 +218,5 @@ class Captionr:
                     logging.debug(f'Wrote {outputfilename}')
 
             logging.info(f'{cap_file}: {caption_txt}')
+        
+            return caption_txt
