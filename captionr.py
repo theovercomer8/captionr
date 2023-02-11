@@ -2,6 +2,8 @@ import argparse
 import pathlib
 import logging
 from dataclasses import dataclass
+
+from PIL import Image
 import os
 from captionr.blip_cap import BLIP
 from captionr.blip2_cap import BLIP2
@@ -10,6 +12,7 @@ from captionr.coca_cap import Coca
 from captionr.git_cap import Git
 from captionr.captionr_class import CaptionrConfig, Captionr
 from tqdm import tqdm
+
 
 config:CaptionrConfig = None
 
@@ -251,6 +254,7 @@ def main() -> None:
         else:
             logging.info("Loading BLIP Model...")
             config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
+
 
     if config.clip_artist or config.clip_flavor or config.clip_medium or config.clip_movement or config.clip_trending:
         logging.info("Loading Clip Model...")
