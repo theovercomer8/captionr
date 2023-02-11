@@ -126,6 +126,10 @@ class Captionr:
                         got_cap = True
                         break
             
+            # Strip period from end of caption
+            if new_caption.endswith('.'):
+                new_caption = new_caption[:-(1)].strip()
+
             # Add enabled CLIP flavors to tag list
             if (config.clip_artist or config.clip_flavor or config.clip_trending or config.clip_movement or config.clip_medium) and config._clip is not None:
                 func = getattr(config._clip,config.clip_method)
@@ -189,7 +193,7 @@ class Captionr:
                 unique_tags.remove('')
             except ValueError:
                 pass
-            
+
             logging.debug(f'Unique tags: {unique_tags}')
             # Construct new caption from tag list
             caption_txt = ", ".join(unique_tags)
