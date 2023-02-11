@@ -11,6 +11,7 @@ from PIL import Image
 from tqdm import tqdm
 from typing import List
 import logging
+import requests
 
 @dataclass 
 class Config:
@@ -40,31 +41,61 @@ class Interrogator():
     def load_clip_model(self):
         start_time = time.time()
         config = self.config
-
+        logging.info(f'Config cache path: {config.cache_path}')
         if config.clip_model is None:
             if config.clip_model_name == 'ViT-L-14/openai':
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_flavors.pkl')):
-                    subprocess.run(['wget', 'https://github.com/theovercomer8/captionr/raw/main/data/ViT-L-14_openai_flavors.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://github.com/theovercomer8/captionr/raw/main/data/ViT-L-14_openai_flavors.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-L-14_openai_flavors.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_artists.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_artists.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_artists.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-L-14_openai_artists.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_mediums.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_mediums.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_mediums.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-L-14_openai_mediums.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_movements.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_movements.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_movements.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-L-14_openai_movements.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_trendings.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_trendings.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_trendings.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-L-14_openai_trendings.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 
             else:
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_flavors.pkl')):
-                    subprocess.run(['wget', 'https://github.com/theovercomer8/captionr/raw/main/data/ViT-H-14_laion2b_s32b_b79k_flavors.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://github.com/theovercomer8/captionr/raw/main/data/ViT-H-14_laion2b_s32b_b79k_flavors.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_flavors.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_artists.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_artists.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_artists.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_artists.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_mediums.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_mediums.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_mediums.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_mediums.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_movements.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_movements.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_movements.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_movements.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_trendings.pkl')):
-                    subprocess.run(['wget', 'https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_trendings.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
+                    r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-H-14_laion2b_s32b_b79k_trendings.pkl', stream=True)
+                    with open(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_trendings.pkl'), 'wb') as fd:
+                        for chunk in r.iter_content(chunk_size=128):
+                            fd.write(chunk)
                 
 
 
