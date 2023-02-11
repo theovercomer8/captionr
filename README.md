@@ -1,6 +1,15 @@
 # captionr
 COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
+### CHANGELOG:
+* Notebook v0.2.0 - Refactoring to support new captionr.py module
+* Captionr.py v0.1.0 - Initial release of local script
+
+### Coming Soon:
+* BLIP2 support
+
+Feature requests? Support? Find me on the [IlluminatiAI Discord](https://discord.gg/HqdffGgeBa)
+
 ## To use the notebook:
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theovercomer8/captionr/blob/main/TO8_Captionr.ipynb)
 
@@ -85,6 +94,11 @@ options:
   --quiet
   --debug
   ```
+
+## Special Thanks
+* @cacoe for the inception of the idea. Be sure to check out his new IlluminatiAI model. It slaps.
+* @Kaz, @jvkas, and @PeePa for help with testing
+* @Stille Willem for the blunt
 <a href="https://www.buymeacoffee.com/theovercomer8" target="_blank"><img width="235" alt="blunt3" src="https://user-images.githubusercontent.com/122644869/218254393-3577b591-d709-41f3-a8bf-a4e604baafae.png">
 
 </a>

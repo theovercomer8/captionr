@@ -8,6 +8,7 @@ from captionr.clip_interrogator import Interrogator, Config
 from captionr.coca_cap import Coca
 from captionr.git_cap import Git
 import torch
+import re
 
 @dataclass
 class CaptionrConfig:
@@ -130,8 +131,9 @@ class Captionr:
                         break
             
             # Strip period from end of caption
-            if new_caption.endswith('.'):
-                new_caption = new_caption[:-(1)].strip()
+            matches = re.match('^.+(\s+\.\s*)$',new_caption)
+            if matches is not None:
+                new_caption = new_caption[:-(len(matches.group(1)))].strip()
 
             # Add enabled CLIP flavors to tag list
             if (config.clip_artist or config.clip_flavor or config.clip_trending or config.clip_movement or config.clip_medium) and config._clip is not None:
