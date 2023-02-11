@@ -300,7 +300,7 @@ def process_img(img_path):
         if config.folder_tag:
             folder_tags = get_parent_folder(img_path,config.folder_tag_levels)
             for tag in folder_tags:
-                out_tags.append(tag)
+                out_tags.append(tag.strip())
 
         # Remove duplicates, filter dumb stuff
         # chars_to_strip = ["_\\("]
@@ -309,15 +309,15 @@ def process_img(img_path):
         if config.ignore_tags != "" and config.ignore_tags is not None:
             si_tags = config.ignore_tags.split(",")
             for tag in si_tags:
-                tags_to_ignore.append(tag.strip)
+                tags_to_ignore.append(tag.strip())
 
         if config.uniquify_tags:
             for tag in out_tags:
-                if not tag in unique_tags and not "_\(" in tag and  tag not in tags_to_ignore:
+                if not tag.strip() in unique_tags and not "_\(" in tag and  tag.strip() not in tags_to_ignore:
                     unique_tags.append(tag.strip())
         else:
             for tag in out_tags:
-                if not "_\(" in tag and tag not in tags_to_ignore:
+                if not "_\(" in tag and tag.strip() not in tags_to_ignore:
                     unique_tags.append(tag.strip())
         logging.debug(f'Unique tags (before existing): {unique_tags}')
         logging.debug(f'Out Tags: {out_tags}')
@@ -329,20 +329,20 @@ def process_img(img_path):
         if config.existing == "prepend" and len(existing_tags):
             new_tags = existing_tags
             for tag in unique_tags:
-                if not tag in new_tags or not config.uniquify_tags:
-                    new_tags.append(tag)
+                if not tag.strip() in new_tags or not config.uniquify_tags:
+                    new_tags.append(tag.strip())
             unique_tags = new_tags
 
         if config.existing == 'append' and len(existing_tags):
             for tag in existing_tags:
-                if not tag in unique_tags or not config.uniquify_tags:
-                    unique_tags.append(tag)
+                if not tag.strip() in unique_tags or not config.uniquify_tags:
+                    unique_tags.append(tag.strip())
 
         if config.existing == 'copy' and existing_caption:
             for tag in existing_tags:
                 unique_tags.append(tag.strip())
 
-
+        unique_tags.remove('')
         logging.debug(f'Unique tags: {unique_tags}')
         # Construct new caption from tag list
         caption_txt = ", ".join(unique_tags)
@@ -380,18 +380,56 @@ def main() -> None:
     parser = init_argparse()
     config = parser.parse_args()
     config.base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    logging.basicConfig(level=logging.INFO)
-    if config.quiet:
-        logging.basicConfig(level=logging.ERROR)
     if config.debug:
         logging.basicConfig(level=logging.DEBUG)
         logging.debug(config)
+    elif config.quiet:
+        logging.basicConfig(level=logging.ERROR)
+    else:
+        logging.basicConfig(level=logging.INFO)
+
 
     if len(config.folder) == 0:
         parser.error('Folder is required.')
 
-    if not config.git_pass and not config.blip_pass and not config.coca_pass and not config.clip_flavor and not config.clip_artist and not config.clip_medium and not config.clip_movement and not config.clip_trending:
-        parser.error('No captioning flags specified. Use --git_pass | --coca_pass | --blip_pass | --clip_flavor | --clip_artist | --clip_medium | --clip_movement | --clip_trending to initate captioning')
+    if not config.git_pass \
+            and not config.blip_pass \
+            and not config.coca_pass \
+            and not config.clip_flavor \
+            and not config.clip_artist \
+            and not config.clip_medium \
+            and not config.clip_movement \
+            and not config.clip_trending:
+        if config.existing == 'skip' \
+            and  ( \
+                ( \
+                    config.find is not None and config.find != '' \
+                    and config.replace is not None and config.replace != '' \
+                ) \
+                or config.folder_tag \
+                or ( \
+                    config.prepend_text is not None \
+                    and config.prepend_text != '' \
+                ) \
+                or ( \
+                    config.append_text is not None \
+                    and config.append_text != '' \
+                ) \
+            ):
+            parser.error('--existing=skip cannot be used for find/replace, folder tagging, text prepending/appending unless a caption model is selected. To run a caption pass without a model selected, please choose a different option for existing caption.')
+        else:
+            if config.existing == 'skip' \
+                and not ( \
+                    (config.find is not None and config.find != '' \
+                    and config.replace is not None and config.replace != '') \
+                    or config.folder_tag \
+                    or (config.prepend_text is not None \
+                        and config.prepend_text != '') \
+                    or (config.append_text is not None \
+                        and config.append_text != '') \
+                ):
+            
+                parser.error('No captioning flags specified. Use --git_pass | --coca_pass | --blip_pass | --clip_flavor | --clip_artist | --clip_medium | --clip_movement | --clip_trending | --find/--replace | --folder_tag | --prepend_text | --append_text to initate captioning')
 
     if config.coca_pass:
         logging.info("Loading Coca Model...")
