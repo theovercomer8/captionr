@@ -2,12 +2,11 @@
 COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
 ### CHANGELOG:
-* Notebook v0.2.1 - Adding GDrive cell
-* Notebook v0.2.0 - Refactoring to support new captionr.py module
+* Notebook v0.2.2 - Aded BLIP2 support
+* Captionr.py v0.2.0 - Added BLIP2 support
+* Notebook v0.2.1 - Added GDrive cell
+* Notebook v0.2.0 - Refactored to support new captionr.py module
 * Captionr.py v0.1.0 - Initial release of local script
-
-### Coming Soon:
-* BLIP2 support
 
 Feature requests? Support? Find me on the [IlluminatiAI Discord](https://discord.gg/HqdffGgeBa)
 
@@ -21,6 +20,9 @@ Feature requests? Support? Find me on the [IlluminatiAI Discord](https://discord
 <img width="336" alt="image" src="https://user-images.githubusercontent.com/122644869/217713111-9325216e-d6a2-43a5-8e1a-d56243aca5cb.png">
 
 ## To use the script:
+The salesforce-lavis module required to use BLIP2 is not compatible with Python 3.9 or higher. It is recommended that you install Python 3.8 if you are currently using 3.9 or higher. It is recommended to use a tool like [Pyenv](https://github.com/pyenv/pyenv) to install/manage older Python versions if you are not experienced with doing so.
+
+Trying to follow the below instructions with versions newer than 3.8 will cause errors.
 
 - Clone the repo
 `git clone https://github.com/theovercomer8/captionr`
@@ -43,7 +45,7 @@ Caption a set of images
 positional arguments:
   folder                One or more folders to scan for iamges. Images should be jpg/png.
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   --output OUTPUT       Output to a folder rather than side by side with image files
@@ -56,6 +58,9 @@ options:
   --blip_pass           Perform a BLIP model pass
   --model_order MODEL_ORDER
                         Perform captioning/fallback using this order (default: coca,git,blip)
+  --use_blip2           Uses BLIP2 for BLIP pass. Only activated when --blip_pass also specified
+  --blip2_model {blip2_t5/pretrain_flant5xxl,blip2_opt/pretrain_opt2.7b,blip2_opt/pretrain_opt6.7b,blip2_opt/caption_coco_opt2.7b,blip2_opt/aption_coco_opt6.7b,blip2_t5/pretrain_flant5xl,blip2_t5/caption_coco_flant5xl}
+                        Specify the BLIP2 model to use
   --blip_beams BLIP_BEAMS
                         Number of BLIP beams (default: 64)
   --blip_min BLIP_MIN   BLIP min length (default: 30)
@@ -95,6 +100,7 @@ options:
   --quiet
   --debug
   ```
+
 
 ## Special Thanks
 * @cacoe for the inception of the idea. Be sure to check out his new IlluminatiAI model. It slaps.

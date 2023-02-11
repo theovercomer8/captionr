@@ -8,3 +8,4 @@ tqdm
 open_clip_torch
 git+https://github.com/huggingface/transformers.git
 git+https://github.com/theovercomer8/BLIP
+salesforce-lavis
