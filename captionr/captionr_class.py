@@ -3,10 +3,10 @@ import logging
 from dataclasses import dataclass
 from PIL import Image
 import os
-from .blip_cap import BLIP
-from .clip_interrogator import Interrogator, Config
-from .coca_cap import Coca
-from .git_cap import Git
+from captionr.blip_cap import BLIP
+from captionr.clip_interrogator import Interrogator, Config
+from captionr.coca_cap import Coca
+from captionr.git_cap import Git
 import torch
 
 @dataclass
