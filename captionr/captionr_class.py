@@ -185,8 +185,11 @@ class Captionr:
                 for tag in existing_tags:
                     unique_tags.append(tag.strip())
 
-            if '' in unique_tags:
+            try:
                 unique_tags.remove('')
+            except ValueError:
+                pass
+            
             logging.debug(f'Unique tags: {unique_tags}')
             # Construct new caption from tag list
             caption_txt = ", ".join(unique_tags)
