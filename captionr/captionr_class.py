@@ -82,8 +82,11 @@ class Captionr:
             existing_caption = ''
             cap_file = os.path.join(os.path.dirname(img_path),os.path.splitext(os.path.split(img_path)[1])[0] + f'.{config.extension}')
             if os.path.isfile(cap_file):
-                with open(cap_file) as f:
-                    existing_caption = f.read()
+                try:
+                    with open(cap_file) as f:
+                        existing_caption = f.read()
+                except Exception as e:
+                    logging.debug(f"Got exception reading caption file: {e}")
 
             # Get caption from filename if empty
             if existing_caption == '' and config.use_filename:
