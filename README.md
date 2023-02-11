@@ -1,12 +1,81 @@
 # captionr
-GIT/BLIP/CLIP Caption tool as a Colab notebook 
+COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
+## To use the notebook:
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theovercomer8/captionr/blob/main/TO8_Captionr.ipynb)
 
-## Wizard interface
+### Wizard interface
 <img width="1029" alt="image" src="https://user-images.githubusercontent.com/122644869/217708333-c80320ba-3351-4bd4-8da5-e6c14037defc.png">
 
-## Live caption previews
+### Live caption previews
 <img width="336" alt="image" src="https://user-images.githubusercontent.com/122644869/217713111-9325216e-d6a2-43a5-8e1a-d56243aca5cb.png">
 
+## To use the script:
 
+- Clone the repo
+`git clone https://github.com/theovercomer8/captionr`
+
+- Install requirements
+`pip install -r requirements.txt`
+
+- Execute
+`python captionr/captionr.py --help`
+```usage: Captionr [OPTIONS] [FOLDER]...
+
+Caption a set of images
+
+positional arguments:
+  folder                One or more folders to scan for iamges. Images should be jpg/png.
+
+options:
+  -h, --help            show this help message and exit
+  -v, --version         show program's version number and exit
+  --output OUTPUT       Output to a folder rather than side by side with image files
+  --existing {skip,ignore,copy,prepend,append}
+                        Action to take for existing caption files (default: skip)
+  --cap_length CAP_LENGTH
+                        Maximum length of caption. (default: 0)
+  --git_pass            Perform a GIT model pass
+  --coca_pass           Perform a Coca model pass
+  --blip_pass           Perform a BLIP model pass
+  --model_order MODEL_ORDER
+                        Perform captioning/fallback using this order (default: coca,git,blip)
+  --blip_beams BLIP_BEAMS
+                        Number of BLIP beams (default: 64)
+  --blip_min BLIP_MIN   BLIP min length (default: 30)
+  --blip_max BLIP_MAX   BLIP max length (default: 75)
+  --clip_model_name {ViT-H-14/laion2b_s32b_b79k,ViT-L-14/openai}
+                        CLIP model to use. Use ViT-H for SD 2.x, ViT-L for SD 1.5 (default: ViT-H-14/laion2b_s32b_b79k)
+  --clip_flavor         Add CLIP Flavors
+  --clip_max_flavors CLIP_MAX_FLAVORS
+                        Max CLIP Flavors (default: 8)
+  --clip_artist         Add CLIP Artists
+  --clip_medium         Add CLIP Mediums
+  --clip_movement       Add CLIP Movements
+  --clip_trending       Add CLIP Trendings
+  --clip_method {interrogate,interrogate_fast,interrogate_classic}
+                        CLIP method to use
+  --fail_phrases FAIL_PHRASES
+                        Phrases that will fail a caption pass and move to the fallback model. (default: "a sign that says,writing that says,that says,with the word")
+  --ignore_tags IGNORE_TAGS
+                        Comma separated list of tags to ignore
+  --find FIND           Perform find and replace with --replace REPLACE
+  --replace REPLACE     Perform find and replace with --find FIND
+  --folder_tag          Tag the image with folder name
+  --folder_tag_levels FOLDER_TAG_LEVELS
+                        Number of folder levels to tag. (default: 1)
+  --folder_tag_stop FOLDER_TAG_STOP
+                        Do not tag folders any deeper than this path. Overrides --folder_tag_levels if --folder_tag_stop is shallower
+  --uniquify_tags       Ensure tags are unique
+  --prepend_text PREPEND_TEXT
+                        Prepend text to final caption
+  --append_text APPEND_TEXT
+                        Append text to final caption
+  --preview             Do not write to caption file. Just displays preview in STDOUT
+  --use_filename        Read the existing caption from the filename, stripping all special characters/numbers
+  --device {cuda,cpu}   Device to use. (default: cuda)
+  --extension {txt,caption}
+                        Caption file extension. (default: txt)
+  --quiet
+  --debug
+  ```
