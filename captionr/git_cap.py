@@ -21,6 +21,6 @@ class Git:
         pixel_values = self.processor(images=img, return_tensors="pt").pixel_values
 
         pixel_values = pixel_values.to(self.device)
-        generated_ids = self.model.generate(pixel_values=pixel_values, max_length=self.max_length)
+        generated_ids = self.model.generate(pixel_values=pixel_values, max_length=self.max_length if self.max_length != 0 else 9999)
         generated_caption = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
         return generated_caption

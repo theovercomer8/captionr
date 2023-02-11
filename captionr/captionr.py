@@ -9,6 +9,7 @@ from clip_interrogator import Interrogator, Config
 from coca_cap import Coca
 from git_cap import Git
 import torch
+from tqdm import tqdm
 
 @dataclass
 class CaptionrConfig:
@@ -30,7 +31,7 @@ class CaptionrConfig:
     clip_medium = False
     clip_movement = False
     clip_trending = False
-    clip_method = 'interrogate'
+    clip_method = 'interrogate_fast'
     fail_phrases = 'a sign that says,writing that says,that says,with the word'
     ignore_tags = ''
     find = ''
@@ -71,7 +72,6 @@ def init_argparse() -> argparse.ArgumentParser:
                         help='One or more folders to scan for iamges. Images should be jpg/png.',
                         type=pathlib.Path,
                         nargs='*',
-                        action='append'
                         )
     parser.add_argument('--output', 
                         help='Output to a folder rather than side by side with image files',
@@ -152,7 +152,7 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('--clip_method',
                         help='CLIP method to use',
                         choices=['interrogate','interrogate_fast','interrogate_classic'],
-                        default='interrogate'
+                        default='interrogate_fast'
                         )
     parser.add_argument('--fail_phrases',
                         help='Phrases that will fail a caption pass and move to the fallback model. (default: "a sign that says,writing that says,that says,with the word")',
@@ -237,7 +237,7 @@ def process_img(img_path):
     with Image.open(img_path).convert('RGB') as img:
         # Get existing caption
         existing_caption = ''
-        cap_file = os.path.join(config.folder,os.path.splitext(os.path.split(img_path)[1])[0] + f'.{config.extension}')
+        cap_file = os.path.join(os.path.dirname(img_path),os.path.splitext(os.path.split(img_path)[1])[0] + f'.{config.extension}')
         if os.path.isfile(cap_file):
             with open(cap_file) as f:
                 existing_caption = f.read()
@@ -256,21 +256,27 @@ def process_img(img_path):
         got_cap = False
         for m in config.model_order.split(','):
             if m == 'git' and config.git_pass and config._git is not None and not got_cap:
+                logging.debug('Getting GIT caption')
                 new_caption = config._git.caption(img)
+                logging.debug(f'GIT Caption: {new_caption}')
                 if any(f in new_caption for f in config.fail_phrases.split(',')):
                     logging.info(f'GIT caption was\n{new_caption}\nFail phrases detected.')
                 else:
                     got_cap = True
                     break
             elif m == 'coca' and config.coca_pass and config._coca is not None and not got_cap:
+                logging.debug('Getting Coca caption')
                 new_caption = config._coca.caption(img)
+                logging.debug(f'Coca Caption: {new_caption}')
                 if any(f in new_caption for f in config.fail_phrases.split(',')):
                     logging.info(f'Coca caption was\n{new_caption}\nFail phrases detected.')
                 else:
                     got_cap = True
                     break
             elif m == 'blip' and config.blip_pass and config._blip is not None and not got_cap:
+                logging.debug('Getting BLIP caption')
                 new_caption = config._blip.caption(img)
+                logging.debug(f'BLIP Caption: {new_caption}')
                 if any(f in new_caption for f in config.fail_phrases.split(',')):
                     logging.info(f'BLIP caption was\n{new_caption}\nFail phrases detected.')
                 else:
@@ -281,11 +287,13 @@ def process_img(img_path):
         if (config.clip_artist or config.clip_flavor or config.clip_trending or config.clip_movement or config.clip_medium) and config._clip is not None:
             func = getattr(config._clip,config.clip_method)
             tags = func(caption=new_caption, image=img, max_flavors=config.clip_max_flavors)
-            for tag in tags:
-                out_tags.append(tag)
+            logging.debug(f'CLIP tags: {tags}')
+
+            for tag in tags.split(","):
+                out_tags.append(tag.strip())
         else:
             for tag in new_caption.split(","):
-                out_tags.append(tag)
+                out_tags.append(tag.strip())
 
 
         # Add parent folder to tag list if enabled
@@ -305,14 +313,17 @@ def process_img(img_path):
 
         if config.uniquify_tags:
             for tag in out_tags:
-                if not tag in unique_tags and not "_\(" in tag and not tag in config.ignore_tags:
+                if not tag in unique_tags and not "_\(" in tag and  tag not in tags_to_ignore:
                     unique_tags.append(tag.strip())
         else:
             for tag in out_tags:
-                if not "_\(" in tag and not tag in config.ignore_tags:
+                if not "_\(" in tag and tag not in tags_to_ignore:
                     unique_tags.append(tag.strip())
+        logging.debug(f'Unique tags (before existing): {unique_tags}')
+        logging.debug(f'Out Tags: {out_tags}')
 
         existing_tags = existing_caption.split(",")
+        logging.debug(f'Existing Tags: {existing_tags}')
 
         # APPEND/PREPEND/OVERWRITE existing caption based on options
         if config.existing == "prepend" and len(existing_tags):
@@ -332,7 +343,7 @@ def process_img(img_path):
                 unique_tags.append(tag.strip())
 
 
-
+        logging.debug(f'Unique tags: {unique_tags}')
         # Construct new caption from tag list
         caption_txt = ", ".join(unique_tags)
 
@@ -348,10 +359,10 @@ def process_img(img_path):
                 tags[-1] = tags[-1].rstrip(",")
         caption_txt = " ".join(tags)
 
-        if config.append_text != '':
+        if config.append_text != '' and config.append_text is not None:
             caption_txt = caption_txt + config.append_text
         
-        if config.prepend_text != '':
+        if config.prepend_text != '' and config.prepend_text is not None:
             caption_txt = config.prepend_text.rstrip().lstrip() + ' ' + caption_txt
 
         # Write caption file
@@ -368,7 +379,8 @@ def main() -> None:
     global config
     parser = init_argparse()
     config = parser.parse_args()
-
+    config.base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    logging.basicConfig(level=logging.INFO)
     if config.quiet:
         logging.basicConfig(level=logging.ERROR)
     if config.debug:
@@ -399,16 +411,21 @@ def main() -> None:
                                            quiet=config.quiet,
                                            data_path=os.path.join(config.base_path,'data'),
                                            cache_path=os.path.join(config.base_path,'data')))
-
+    paths = []
     for folder in config.folder:
-        for root, dirs, files in os.walk(folder, topdown=False):
+        for root, dirs, files in os.walk(folder.absolute(), topdown=False):
             for name in files:
+                
+                if os.path.splitext(os.path.split(name)[1])[1].upper() not in ['.JPEG','.JPG','.JPE', '.PNG']:
+                    continue
                 if config.extension not in os.path.splitext(os.path.split(name)[1])[1]:
-                    cap_file = os.path.join(folder,os.path.splitext(os.path.split(name)[1])[0] + f'.{config.extension}')
+                    cap_file = os.path.join(folder.absolute(),os.path.splitext(os.path.split(name)[1])[0] + f'.{config.extension}')
                 if not config.existing == 'skip' or not os.path.exists(cap_file):
-                    process_img(os.path.join(root, name))
+                    paths.append(os.path.join(root, name))
                 else:
                     logging.info(f'Caption file {cap_file} exists. Skipping.')
+    for path in tqdm(paths):
+        process_img(path)
 
 if __name__ == "__main__":
    main()

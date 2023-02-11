@@ -42,7 +42,7 @@ class Interrogator():
         config = self.config
 
         if config.clip_model is None:
-            if clip_model_name == 'ViT-L-14/openai':
+            if config.clip_model_name == 'ViT-L-14/openai':
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_flavors.pkl')):
                     subprocess.run(['wget', 'https://github.com/theovercomer8/captionr/raw/main/data/ViT-L-14_openai_flavors.pkl', '-P', config.cache_path], stdout=subprocess.PIPE)
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_artists.pkl')):
