@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from PIL import Image
 import os
 from blip_cap import BLIP
+from blip2_cap import BLIP2
 from clip_interrogator import Interrogator, Config
 from coca_cap import Coca
 from git_cap import Git
@@ -21,6 +22,8 @@ class CaptionrConfig:
     coca_pass = False
     blip_pass = False
     model_order = 'coca,git,blip'
+    use_blip2 = False
+    blip2_model = ''
     blip_beams = 64
     blip_min = 30
     blip_max = 75
@@ -104,6 +107,12 @@ def init_argparse() -> argparse.ArgumentParser:
                         help='Perform captioning/fallback using this order (default: coca,git,blip)',
                         default='coca,git,blip',
                         )
+    parser.add_argument('--use_blip2',
+                        help='Uses BLIP2 for BLIP pass. Only activated when --blip_pass also specified',
+                        action='store_true')
+    parser.add_argument('--blip2_model',
+                        help='Specify the BLIP2 model to use',
+                        choices=['blip2_t5/pretrain_flant5xxl','blip2_opt/pretrain_opt2.7b', 'blip2_opt/pretrain_opt6.7b', 'blip2_opt/caption_coco_opt2.7b', 'blip2_opt/aption_coco_opt6.7b', 'blip2_t5/pretrain_flant5xl', 'blip2_t5/caption_coco_flant5xl'])
     parser.add_argument('--blip_beams',
                         help='Number of BLIP beams (default: 64)',
                         default=64,
@@ -441,7 +450,10 @@ def main() -> None:
 
     if config.blip_pass:
         logging.info("Loading BLIP Model...")
-        config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
+        if config.use_blip2:
+            config._blip = BLIP2(config.device,model_name=config.blip2_model,config.cap_length)
+        else:
+            config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
 
     if config.clip_artist or config.clip_flavor or config.clip_medium or config.clip_movement or config.clip_trending:
         logging.info("Loading Clip Model...")
