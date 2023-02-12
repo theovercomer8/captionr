@@ -187,7 +187,7 @@ def main() -> None:
     global config
     parser = init_argparse()
     config = parser.parse_args()
-    config.base_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    config.base_path = os.path.dirname(os.path.abspath(__file__))
     if config.debug:
         logging.basicConfig(level=logging.DEBUG)
         logging.debug(config)
