@@ -103,7 +103,7 @@ optional arguments:
 
 
 ## Special Thanks
-* @cacoe for the inception of the idea. Be sure to check out his new IlluminatiAI model. It slaps.
+* @cacoe for the inception of the idea. Be sure to check out his new [IlluminatiAI model](https://huggingface.co/IlluminatiAI/Illuminati_Diffusion_v1.0). It slaps.
 * @Kaz, @jvkas, and @PeePa for help with testing
 * @Stille Willem for the blunt
 
