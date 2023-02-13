@@ -166,8 +166,10 @@ class Captionr:
 
                 # BLIP2 questions
                 if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
+                    image = config._blip.processor["eval"](img).unsqueeze(0).to(config._blip.device)
+
                     for q in config.blip2_questions:
-                        tag = config._blip.question(img,q)
+                        tag = config._blip.question(image,q)
                         out_tags.append(tag.strip())
 
                 # Add parent folder to tag list if enabled
