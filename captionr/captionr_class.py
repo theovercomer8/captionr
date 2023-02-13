@@ -253,7 +253,11 @@ class Captionr:
                         file.write(caption_txt)
                         logging.debug(f'Wrote {outputfilename}')
 
-                logging.info(f'{cap_file}: {caption_txt}')
+                if config.preview:
+                    logging.info(f'PREVIEW: {caption_txt}')
+                    logging.info('No caption file written.')
+                else:
+                    logging.info(f'{cap_file}: {caption_txt}')
             
                 return caption_txt
         except Exception as e:

@@ -278,6 +278,9 @@ def main() -> None:
                                            quiet=config.quiet,
                                            data_path=os.path.join(config.base_path,'data'),
                                            cache_path=os.path.join(config.base_path,'data')))
+        
+    if config.preview:
+        logging.info('PREVIEW MODE ENABLED. No caption files will be written.')
     paths = []
     cptr = Captionr(config=config)
     for folder in config.folder:
