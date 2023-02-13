@@ -20,4 +20,13 @@ class BLIP2:
     def caption(self,img:Image) -> str:
         image = self.processor["eval"](img).unsqueeze(0).to(self.device)
         return self.model.generate({"image": image})[0]
+    
+    def question(self,img:Image,question:str) -> str:
+        q = f"Question: {question} Answer:"
+        reply = self.model.generate({"image": img, "prompt": q})
+        if len(reply) > 0:
+            reply = reply[0]
+        reply = reply.replace(q,'')
+        return reply
+
      
