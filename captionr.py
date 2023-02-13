@@ -2,6 +2,7 @@ import argparse
 import pathlib
 import logging
 from dataclasses import dataclass
+import sys
 
 from PIL import Image
 import os
@@ -69,6 +70,10 @@ def init_argparse() -> argparse.ArgumentParser:
                         help='Specify the BLIP2 model to use',
                         choices=['blip2_t5/pretrain_flant5xxl','blip2_opt/pretrain_opt2.7b', 'blip2_opt/pretrain_opt6.7b', 'blip2_opt/caption_coco_opt2.7b', 'blip2_opt/caption_coco_opt6.7b', 'blip2_t5/pretrain_flant5xl', 'blip2_t5/caption_coco_flant5xl'],
                         default='blip2_t5/pretrain_flant5xxl'
+                        )
+    parser.add_argument('--blip2_question_file',
+                        help='Specify a question file to use to query BLIP2 and add answers as tags',
+                        type=pathlib.Path
                         )
     parser.add_argument('--blip_beams',
                         help='Number of BLIP beams (default: 64)',
@@ -200,6 +205,17 @@ def main() -> None:
     if len(config.folder) == 0:
         parser.error('Folder is required.')
 
+    if config.use_blip2 and config.blip2_question_file is not None:
+        if not config.blip2_question_file.exists or not config.blip2_question_file.is_file:
+            parser.error("Question file does not exist")
+        
+        questions = []
+        with open(config.blip2_question_file) as file:
+            for line in file:
+                questions.append(line)
+
+        config.blip2_questions = questions
+        
     if not config.git_pass \
             and not config.blip_pass \
             and not config.coca_pass \

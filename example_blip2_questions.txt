@@ -1,0 +1,4 @@
+What is the primary subject of this image?
+Is this a photograph, drawing, painting, digital artwork or 3d render?
+Is this a full shot, medium full shot, medium shot, tight medium shot, loose close up, close up, or extreme close up?
+Is it black & white or color?

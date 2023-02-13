@@ -2,7 +2,9 @@
 COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
 ### CHANGELOG:
-* Notebook v0.2.2 - Aded BLIP2 support
+* Caption.py v0.2.1 - Added experimental BLIP2 questions support
+* Notebook V0.2.3 - Added experimental BLIP2 questions support
+* Notebook v0.2.2 - Added BLIP2 support
 * Captionr.py v0.2.0 - Added BLIP2 support
 * Notebook v0.2.1 - Added GDrive cell
 * Notebook v0.2.0 - Refactored to support new captionr.py module
@@ -61,8 +63,10 @@ optional arguments:
   --model_order MODEL_ORDER
                         Perform captioning/fallback using this order (default: coca,git,blip)
   --use_blip2           Uses BLIP2 for BLIP pass. Only activated when --blip_pass also specified
-  --blip2_model {blip2_t5/pretrain_flant5xxl,blip2_opt/pretrain_opt2.7b,blip2_opt/pretrain_opt6.7b,blip2_opt/caption_coco_opt2.7b,blip2_opt/aption_coco_opt6.7b,blip2_t5/pretrain_flant5xl,blip2_t5/caption_coco_flant5xl}
+  --blip2_model {blip2_t5/pretrain_flant5xxl,blip2_opt/pretrain_opt2.7b,blip2_opt/pretrain_opt6.7b,blip2_opt/caption_coco_opt2.7b,blip2_opt/caption_coco_opt6.7b,blip2_t5/pretrain_flant5xl,blip2_t5/caption_coco_flant5xl}
                         Specify the BLIP2 model to use
+  --blip2_question_file BLIP2_QUESTION_FILE
+                        Specify a question file to use to query BLIP2 and add answers as tags
   --blip_beams BLIP_BEAMS
                         Number of BLIP beams (default: 64)
   --blip_min BLIP_MIN   BLIP min length (default: 30)
@@ -103,6 +107,8 @@ optional arguments:
   --debug
   ```
 
+## BLIP2 Questions
+You can now pass a question file to BLIP2 to add answers to tags with the `--blip2_question_file` param. See `example_blip2_questions.txt`. So far, results aren't great. Ideas/suggestions on how to improve this feature are encouraged.
 
 ## Special Thanks
 * @cacoe for the inception of the idea. Be sure to check out his new [IlluminatiAI model](https://huggingface.co/IlluminatiAI/Illuminati_Diffusion_v1.0). It slaps.

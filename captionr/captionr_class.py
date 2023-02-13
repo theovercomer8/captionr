@@ -21,6 +21,10 @@ class CaptionrConfig:
     coca_pass = False
     blip_pass = False
     model_order = 'coca,git,blip'
+    use_blip2 = False
+    blip2_model = None
+    blip2_question_file:pathlib.Path = None
+    blip2_questions = []
     blip_beams = 64
     blip_min = 30
     blip_max = 75
@@ -160,6 +164,13 @@ class Captionr:
                     for tag in new_caption.split(","):
                         out_tags.append(tag.strip())
 
+                # BLIP2 questions
+                if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
+                    image = config._blip.processor["eval"](img).unsqueeze(0).to(config._blip.device)
+
+                    for q in config.blip2_questions:
+                        tag = config._blip.question(image,q)
+                        out_tags.append(tag.strip())
 
                 # Add parent folder to tag list if enabled
                 if config.folder_tag:
