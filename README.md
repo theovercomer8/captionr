@@ -114,7 +114,7 @@ You can now pass a question file to BLIP2 to add answers to tags with the `--bli
 ## Special Thanks
 * @cacoe for the inception of the idea. Be sure to check out his new [IlluminatiAI model](https://huggingface.co/IlluminatiAI/Illuminati_Diffusion_v1.0). It slaps.
 * @Kaz, @jvkas, and @PeePa for help with testing
-* @Stille Willem for the blunt
+* @Stille Willem and @NimbusFPV for the blunts
 
 <a href="https://ko-fi.com/theovercomer8"><img width="145" alt="blunt" src="https://user-images.githubusercontent.com/122644869/218321249-d343e3b2-1600-466b-aac3-968316a75033.png"></a>
 
