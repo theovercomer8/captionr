@@ -2,8 +2,9 @@
 COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
 ### CHANGELOG:
+* Notebook v0.2.4 - Added caption editor widget
 * Caption.py v0.2.1 - Added experimental BLIP2 questions support
-* Notebook V0.2.3 - Added experimental BLIP2 questions support
+* Notebook v0.2.3 - Added experimental BLIP2 questions support
 * Notebook v0.2.2 - Added BLIP2 support
 * Captionr.py v0.2.0 - Added BLIP2 support
 * Notebook v0.2.1 - Added GDrive cell
