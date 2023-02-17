@@ -23,8 +23,8 @@ class CaptionrConfig:
     model_order = 'coca,git,blip'
     use_blip2 = False
     blip2_model = None
-    blip2_question_file:pathlib.Path = None
-    blip2_questions = []
+    # blip2_question_file:pathlib.Path = None
+    # blip2_questions = []
     blip_beams = 64
     blip_min = 30
     blip_max = 75
@@ -172,12 +172,13 @@ class Captionr:
                         out_tags.append(tag.strip())
 
                 # BLIP2 questions
-                if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
+                # REMOVED: Until it doesn't suck
+                # if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
 
 
-                    for q in config.blip2_questions:
-                        tag = config._blip.question(img=img,text=q, decoding_method=config.blip2_decode_method, temperature=config.blip2_temp, length_penalty=config.blip2_length_penalty, repetition_penalty=config.blip2_repeat_penalty, max_length=config.blip_max, min_length=config.blip_min, num_beams=config.blip_beams)
-                        out_tags.append(tag.strip())
+                #     for q in config.blip2_questions:
+                #         tag = config._blip.question(img=img,text=q, decoding_method=config.blip2_decode_method, temperature=config.blip2_temp, length_penalty=config.blip2_length_penalty, repetition_penalty=config.blip2_repeat_penalty, max_length=config.blip_max, min_length=config.blip_min, num_beams=config.blip_beams)
+                #         out_tags.append(tag.strip())
 
                 # Add parent folder to tag list if enabled
                 if config.folder_tag:
