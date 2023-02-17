@@ -68,7 +68,14 @@ def init_argparse() -> argparse.ArgumentParser:
                         action='store_true')
     parser.add_argument('--blip2_model',
                         help='Specify the BLIP2 model to use',
-                        choices=['blip2_t5/pretrain_flant5xxl','blip2_opt/pretrain_opt2.7b', 'blip2_opt/pretrain_opt6.7b', 'blip2_opt/caption_coco_opt2.7b', 'blip2_opt/caption_coco_opt6.7b', 'blip2_t5/pretrain_flant5xl', 'blip2_t5/caption_coco_flant5xl'],
+                        choices=['Salesforce/blip2-flan-t5-xxl' 
+                                    'Salesforce/blip2-flan-t5-xl-coco',
+                                    'Salesforce/blip2-opt-6.7b', 
+                                    'Salesforce/blip-vqa-capfilt-large' 
+                                    'Salesforce/blip2-opt-6.7b-coco', 
+                                    'Salesforce/blip2-flan-t5-xl', 
+                                    'Salesforce/blip2-opt-2.7b-coco', 
+                                    'Salesforce/blip2-opt-2.7b'],
                         default='blip2_t5/pretrain_flant5xxl'
                         )
     parser.add_argument('--blip2_question_file',
@@ -90,6 +97,24 @@ def init_argparse() -> argparse.ArgumentParser:
                         default=75,
                         type=int
                         )
+    parser.add_argument('--blip2_decode_method',
+                        help='Text Decoding Method (default: Beam search)',
+                        choices=['Beam search', 'Nucleus sampling'])
+    parser.add_argument('--blip2_temp',
+                        help='Temperature (used with nucleus sampling. Min: 0.5, max: 1.0. (default: 1.0))',
+                        default=1.0,
+                        type=float
+                        )
+    parser.add_argument('--blip2_length_penalty',
+                        help='Length Penalty (set to larger for longer sequence, used with beam search). Min: 1.0, max: 2.0 (default: 1.0)',
+                        default=1.0,
+                        type=float)
+    parser.add_argument('--blip2_repeat_penalty',
+                        help='Repeat Penalty (larger value prevents repetition) Min: 1.0, max: 5.0 (default: 1.5)',
+                        default=1.5,
+                        type=float
+                        )
+    
     parser.add_argument('--clip_model_name',
                         help='CLIP model to use. Use ViT-H for SD 2.x, ViT-L for SD 1.5 (default: ViT-H-14/laion2b_s32b_b79k)',
                         default='ViT-H-14/laion2b_s32b_b79k',

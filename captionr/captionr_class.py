@@ -28,6 +28,10 @@ class CaptionrConfig:
     blip_beams = 64
     blip_min = 30
     blip_max = 75
+    blip2_decode_method = 'Beam search'
+    blip2_temp = 1.0
+    blip2_length_penalty = 1.0
+    blip2_repeat_penalty = 1.5
     clip_model_name = 'ViT-H-14/laion2b_s32b_b79k'
     clip_flavor = False
     clip_max_flavors = 8
@@ -136,7 +140,10 @@ class Captionr:
                     elif m == 'blip' and config.blip_pass and config._blip is not None and not got_cap:
                         logging.debug('Getting BLIP caption')
                         try:
-                            new_caption = config._blip.caption(img)
+                            if config.use_blip2:
+                                new_caption = config._blip.caption(img=img, decoding_method=config.blip2_decode_method, temperature=config.blip2_temp, length_penalty=config.blip2_length_penalty, repetition_penalty=config.blip2_repeat_penalty, max_length=config.blip_max, min_length=config.blip_min, num_beams=config.blip_beams)
+                            else:
+                                new_caption = config._blip.caption(img)
                         except:
                             logging.exception("Exception during BLIP captioning")
                             continue
@@ -166,10 +173,10 @@ class Captionr:
 
                 # BLIP2 questions
                 if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
-                    image = config._blip.processor["eval"](img).unsqueeze(0).to(config._blip.device)
+
 
                     for q in config.blip2_questions:
-                        tag = config._blip.question(image,q)
+                        tag = config._blip.question(img=img,text=q, decoding_method=config.blip2_decode_method, temperature=config.blip2_temp, length_penalty=config.blip2_length_penalty, repetition_penalty=config.blip2_repeat_penalty, max_length=config.blip_max, min_length=config.blip_min, num_beams=config.blip_beams)
                         out_tags.append(tag.strip())
 
                 # Add parent folder to tag list if enabled

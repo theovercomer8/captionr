@@ -6,6 +6,6 @@ Pillow
 requests
 tqdm
 open_clip_torch
-git+https://github.com/huggingface/transformers.git
+git+https://github.com/huggingface/transformers@c836f77
 git+https://github.com/theovercomer8/BLIP
-salesforce-lavis
+bitsandbytes==0.37.0

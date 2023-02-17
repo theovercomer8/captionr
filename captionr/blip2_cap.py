@@ -1,6 +1,6 @@
-from lavis.models import load_model_and_preprocess
 from PIL import Image
-
+import torch
+from transformers import AutoProcessor, Blip2ForConditionalGeneration
 class BLIP2:
     device = None
     max_length:int
@@ -11,22 +11,56 @@ class BLIP2:
         self.device = device
         self.max_length = max_length
         name, model_type = self.model_name.split('/')
+        self.processor = AutoProcessor.from_pretrained(self.model_name)
+        self.model = Blip2ForConditionalGeneration.from_pretrained(self.model_name,
+                                                      device_map='auto',
+                                                      load_in_8bit=True)
         self.model, self.processor, _ = load_model_and_preprocess(
             name=name, model_type=model_type, is_eval=True, device=device
         )
         
     
+    def caption(self, img: Image,
+                     decoding_method: str, temperature: float,
+                     length_penalty: float, repetition_penalty: float, max_length: int, min_length: int, num_beams: int) -> str:
+
+        inputs = self.processor(images=img,
+                        return_tensors='pt').to(self.device, torch.float16)
+        generated_ids = self.model.generate(
+            pixel_values=inputs.pixel_values,
+            do_sample=decoding_method == 'Nucleus sampling',
+            temperature=temperature,
+            length_penalty=length_penalty,
+            repetition_penalty=repetition_penalty,
+            max_length=max_length,
+            min_length=min_length,
+            num_beams=num_beams,
+            top_p=0.9)
+        result = self.processor.batch_decode(generated_ids,
+                                        skip_special_tokens=True)[0].strip()
+        return result
     
-    def caption(self,img:Image) -> str:
-        image = self.processor["eval"](img).unsqueeze(0).to(self.device)
-        return self.model.generate({"image": image})[0]
     
-    def question(self,img:Image,question:str) -> str:
-        q = f"Question: {question} Answer:"
-        reply = self.model.generate({"image": img, "prompt": q})
-        if len(reply) > 0:
-            reply = reply[0]
-        reply = reply.replace(q,'')
-        return reply
+    
+    def question(self, img: Image, text: str,
+                    decoding_method: str, temperature: float,
+                    length_penalty: float, repetition_penalty: float, max_length: int, min_length: int, num_beams: int) -> str:
+
+        inputs = self.processor(images=img, text=text,
+                        return_tensors='pt').to(self.device, torch.float16)
+        generated_ids = self.model.generate(**inputs,
+                                    do_sample=decoding_method ==
+                                    'Nucleus sampling',
+                                    temperature=temperature,
+                                    length_penalty=length_penalty,
+                                    repetition_penalty=repetition_penalty,
+                                    max_length=max_length,
+                                    min_length=min_length,
+                                    num_beams=num_beams,
+                                    top_p=0.9)
+        result = self.processor.batch_decode(generated_ids,
+                                        skip_special_tokens=True)[0].strip()
+        return result
+   
 
      
