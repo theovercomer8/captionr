@@ -6,6 +6,6 @@ Pillow
 requests
 tqdm
 open_clip_torch
-git+https://github.com/huggingface/transformers@c836f77
+git+https://github.com/huggingface/transformers@087fd5f
 git+https://github.com/theovercomer8/BLIP
 bitsandbytes==0.37.0
