@@ -68,10 +68,10 @@ def init_argparse() -> argparse.ArgumentParser:
                         action='store_true')
     parser.add_argument('--blip2_model',
                         help='Specify the BLIP2 model to use',
-                        choices=['Salesforce/blip2-flan-t5-xxl' 
+                        choices=['Salesforce/blip2-flan-t5-xxl',
                                     'Salesforce/blip2-flan-t5-xl-coco',
                                     'Salesforce/blip2-opt-6.7b', 
-                                    'Salesforce/blip-vqa-capfilt-large' 
+                                    'Salesforce/blip-vqa-capfilt-large',
                                     'Salesforce/blip2-opt-6.7b-coco', 
                                     'Salesforce/blip2-flan-t5-xl', 
                                     'Salesforce/blip2-opt-2.7b-coco', 
