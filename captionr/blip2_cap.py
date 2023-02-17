@@ -15,9 +15,7 @@ class BLIP2:
         self.model = Blip2ForConditionalGeneration.from_pretrained(self.model_name,
                                                       device_map='auto',
                                                       load_in_8bit=True)
-        self.model, self.processor, _ = load_model_and_preprocess(
-            name=name, model_type=model_type, is_eval=True, device=device
-        )
+        
         
     
     def caption(self, img: Image,

@@ -290,7 +290,7 @@ def main() -> None:
 
     if config.blip_pass:
         if config.use_blip2:
-            logging.info("Loading BLIP Model...")
+            logging.info("Loading BLIP2 Model...")
             config._blip = BLIP2(config.device,model_name=config.blip2_model,max_length=config.cap_length)
         else:
             logging.info("Loading BLIP Model...")
