@@ -15,6 +15,7 @@ import requests
 
 @dataclass 
 class Config:
+    captionr_config:any = None
     # models can optionally be passed in directly
     clip_model = None
     clip_preprocess = None
@@ -144,13 +145,31 @@ class Interrogator():
     def interrogate_classic(self, caption: str, image: Image, max_flavors: int=3) -> str:
         image_features = self.image_to_features(image)
 
-        medium = self.mediums.rank(image_features, 1)[0]
-        artist = self.artists.rank(image_features, 1)[0]
-        trending = self.trendings.rank(image_features, 1)[0]
-        movement = self.movements.rank(image_features, 1)[0]
-        flaves = ", ".join(self.flavors.rank(image_features, max_flavors))
+        if self.config.captionr_config.clip_medium:
+            medium = self.mediums.rank(image_features, 1)[0]
+        else:
+            medium = ''
+        if self.config.captionr_config.clip_artist:
+            artist = self.artists.rank(image_features, 1)[0]
+        else:
+            artist = ''
+        
+        if self.config.captionr_config.clip_trending:
+            trending = self.trendings.rank(image_features, 1)[0]
+        else:
+            trending = ''
 
-        if caption.startswith(medium):
+        if self.config.captionr_config.clip_movement:
+            movement = self.movements.rank(image_features, 1)[0]
+        else:
+            movement = ''
+
+        if self.config.captionr_config.clip_flavor:
+            flaves = ", ".join(self.flavors.rank(image_features, max_flavors))
+        else:
+            flaves = ''
+
+        if config.caption.startswith(medium) and medium != '':
             prompt = f"{caption} {artist}, {trending}, {movement}, {flaves}"
         else:
             prompt = f"{caption}, {medium} {artist}, {trending}, {movement}, {flaves}"
@@ -159,18 +178,46 @@ class Interrogator():
 
     def interrogate_fast(self, caption: str, image: Image, max_flavors: int = 32) -> str:
         image_features = self.image_to_features(image)
-        merged = _merge_tables([self.artists, self.flavors, self.mediums, self.movements, self.trendings], self.config)
+        tables = []
+        if self.config.captionr_config.clip_artist:
+            tables.append(self.artists)
+        if self.config.captionr_config.clip_flavor:
+            tables.append(self.flavors)
+        if self.config.captionr_config.clip_medium:
+            tables.append(self.mediums)
+        if self.config.captionr_config.clip_movement:
+            tables.append(self.movements)
+        if self.config.captionr_config.clip_trending:
+            tables.append(self.trendings)
+
+        merged = _merge_tables(tables, self.config)
         tops = merged.rank(image_features, max_flavors)
         return _truncate_to_fit(caption + ", " + ", ".join(tops), self.tokenize)
 
     def interrogate(self, caption: str, image: Image, max_flavors: int=32) -> str:
         image_features = self.image_to_features(image)
 
-        flaves = self.flavors.rank(image_features, self.config.flavor_intermediate_count)
-        best_medium = self.mediums.rank(image_features, 1)[0]
-        best_artist = self.artists.rank(image_features, 1)[0]
-        best_trending = self.trendings.rank(image_features, 1)[0]
-        best_movement = self.movements.rank(image_features, 1)[0]
+        if self.config.captionr_config.clip_flavor:
+            flaves = self.flavors.rank(image_features, self.config.flavor_intermediate_count)
+        else:
+            flaves = ''
+        if self.config.captionr_config.clip_medium:
+            best_medium = self.mediums.rank(image_features, 1)[0]
+        else:
+            best_medium = ''
+        if self.config.captionr_config.clip_artist:
+            best_artist = self.artists.rank(image_features, 1)[0]
+        else:
+            best_artist = ''
+        if self.config.captionr_config.clip_trending:
+            best_trending = self.trendings.rank(image_features, 1)[0]
+        else:
+            best_trending = ''
+        
+        if self.config.captionr_config.clip_movement:
+            best_movement = self.movements.rank(image_features, 1)[0]
+        else:
+            best_movement = ''
 
         best_prompt = caption
         best_sim = self.similarity(image_features, best_prompt)
@@ -198,6 +245,7 @@ class Interrogator():
             t = LabelTable(prompts, None, self.clip_model, self.tokenize, self.config)
             best_prompt = t.rank(image_features, 1)[0]
             best_sim = self.similarity(image_features, best_prompt)
+
 
         check_multi_batch([best_medium, best_artist, best_trending, best_movement])
 

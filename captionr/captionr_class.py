@@ -165,12 +165,12 @@ class Captionr:
                         out_tags.append(tag.strip())
 
                 # BLIP2 questions
-                if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
-                    image = config._blip.processor["eval"](img).unsqueeze(0).to(config._blip.device)
+                # if config.use_blip2 and config.blip2_questions is not None and len(config.blip2_questions) > 0:
+                #     image = config._blip.processor["eval"](img).unsqueeze(0).to(config._blip.device)
 
-                    for q in config.blip2_questions:
-                        tag = config._blip.question(image,q)
-                        out_tags.append(tag.strip())
+                #     for q in config.blip2_questions:
+                #         tag = config._blip.question(image,q)
+                #         out_tags.append(tag.strip())
 
                 # Add parent folder to tag list if enabled
                 if config.folder_tag:
@@ -190,11 +190,11 @@ class Captionr:
                 if config.uniquify_tags:
                     for tag in out_tags:
                         if not tag.strip() in unique_tags and not "_\(" in tag and  tag.strip() not in tags_to_ignore:
-                            unique_tags.append(tag.strip())
+                            unique_tags.append(tag.replace('"','').strip())
                 else:
                     for tag in out_tags:
                         if not "_\(" in tag and tag.strip() not in tags_to_ignore:
-                            unique_tags.append(tag.strip())
+                            unique_tags.append(tag.replace('"','').strip())
                 logging.debug(f'Unique tags (before existing): {unique_tags}')
                 logging.debug(f'Out Tags: {out_tags}')
 
@@ -244,10 +244,12 @@ class Captionr:
                 
                 if config.prepend_text != '' and config.prepend_text is not None:
                     caption_txt = config.prepend_text.rstrip().lstrip() + ' ' + caption_txt
-
+                
+                outputfilename = ''
                 # Write caption file
                 if not config.preview:
-                    dirname = os.path.dirname(cap_file) if config.output == '' or config.output is None else config.output
+                    dirname = os.path.dirname(cap_file) if config.output == '' or config.output is None else str(config.output[0])
+                    
                     outputfilename = os.path.join(dirname,os.path.basename(cap_file))
                     with open(outputfilename, "w", encoding="utf8") as file:
                         file.write(caption_txt)
@@ -257,7 +259,7 @@ class Captionr:
                     logging.info(f'PREVIEW: {caption_txt}')
                     logging.info('No caption file written.')
                 else:
-                    logging.info(f'{cap_file}: {caption_txt}')
+                    logging.info(f'{outputfilename}: {caption_txt}')
             
                 return caption_txt
         except Exception as e:
