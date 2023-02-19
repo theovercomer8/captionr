@@ -57,7 +57,7 @@ class BLIP:
                 gpu_image, 
                 sample=False, 
                 num_beams=self.beams, 
-                max_length=self.max, 
-                min_length=self.min
+                max_length=self.blip_max, 
+                min_length=self.blip_min
             )
         return caption[0]
