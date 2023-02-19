@@ -169,7 +169,7 @@ class Interrogator():
         else:
             flaves = ''
 
-        if self.config.caption.startswith(medium) and medium != '':
+        if caption.startswith(medium) and medium != '':
             prompt = f"{caption} {artist}, {trending}, {movement}, {flaves}"
         else:
             prompt = f"{caption}, {medium} {artist}, {trending}, {movement}, {flaves}"
