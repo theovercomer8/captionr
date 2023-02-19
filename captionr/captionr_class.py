@@ -248,7 +248,14 @@ class Captionr:
                 outputfilename = ''
                 # Write caption file
                 if not config.preview:
-                    dirname = os.path.dirname(cap_file) if config.output == '' or config.output is None else str(config.output[0])
+                    if config.output == '' or config.output is None:
+
+                        dirname = os.path.dirname(cap_file)  
+                    else: 
+                        if config.output is [pathlib.PosixPath]:
+                            dirname = str(config.output[0])
+                        else:
+                            dirname = str(config.output)
                     
                     outputfilename = os.path.join(dirname,os.path.basename(cap_file))
                     with open(outputfilename, "w", encoding="utf8") as file:
