@@ -45,7 +45,7 @@ class BLIP:
     
     
     def caption(self,img:Image) -> str:
-        size = self.config.blip_image_eval_size
+        size = self.blip_image_eval_size
         gpu_image = transforms.Compose([
             transforms.Resize((size, size), interpolation=InterpolationMode.BICUBIC),
             transforms.ToTensor(),
