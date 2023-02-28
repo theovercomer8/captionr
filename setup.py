@@ -1,5 +1,5 @@
 setup(name='captionr',
-      version='0.1',
+      version='0.3.0',
       description='Multi-modal image captioning',
       url='https://github.com/theovercomer8/captionr',
       author='David Israel',

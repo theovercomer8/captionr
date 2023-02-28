@@ -12,6 +12,7 @@ from tqdm import tqdm
 from typing import List
 import logging
 import requests
+from thefuzz import fuzz
 
 @dataclass 
 class Config:
@@ -31,6 +32,8 @@ class Config:
     device: str = ("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
     flavor_intermediate_count: int = 2048
     quiet: bool = False # when quiet progress bars are not shown
+
+    fuzz_ratio: int = 50
 
 class Interrogator():
     def __init__(self, config: Config):
@@ -70,7 +73,33 @@ class Interrogator():
                     with open(os.path.join(config.cache_path,'ViT-L-14_openai_trendings.pkl'), 'wb') as fd:
                         for chunk in r.iter_content(chunk_size=128):
                             fd.write(chunk)
-                
+            elif config.clip_model_name == 'ViT-bigG-14/openai':
+                print('No cache items to preload')
+                # if not os.path.exists(os.path.join(config.cache_path,'ViT-bigG-14_openai_flavors.pkl')):
+                #     r = requests.get('https://github.com/theovercomer8/captionr/raw/main/data/ViT-L-14_openai_flavors.pkl', stream=True)
+                #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_flavors.pkl'), 'wb') as fd:
+                #         for chunk in r.iter_content(chunk_size=128):
+                #             fd.write(chunk)
+                # if not os.path.exists(os.path.join(config.cache_path,'ViT-bigG-14_openai_artists.pkl')):
+                #     r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_artists.pkl', stream=True)
+                #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_artists.pkl'), 'wb') as fd:
+                #         for chunk in r.iter_content(chunk_size=128):
+                #             fd.write(chunk)
+                # if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_mediums.pkl')):
+                #     r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_mediums.pkl', stream=True)
+                #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_mediums.pkl'), 'wb') as fd:
+                #         for chunk in r.iter_content(chunk_size=128):
+                #             fd.write(chunk)
+                # if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_movements.pkl')):
+                #     r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_movements.pkl', stream=True)
+                #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_movements.pkl'), 'wb') as fd:
+                #         for chunk in r.iter_content(chunk_size=128):
+                #             fd.write(chunk)
+                # if not os.path.exists(os.path.join(config.cache_path,'ViT-L-14_openai_trendings.pkl')):
+                #     r = requests.get('https://huggingface.co/pharma/ci-preprocess/resolve/main/ViT-L-14_openai_trendings.pkl', stream=True)
+                #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_trendings.pkl'), 'wb') as fd:
+                #         for chunk in r.iter_content(chunk_size=128):
+                #             fd.write(chunk)
             else:
                 if not os.path.exists(os.path.join(config.cache_path,'ViT-H-14_laion2b_s32b_b79k_flavors.pkl')):
                     r = requests.get('https://github.com/theovercomer8/captionr/raw/main/data/ViT-H-14_laion2b_s32b_b79k_flavors.pkl', stream=True)
@@ -141,6 +170,24 @@ class Interrogator():
             image_features = self.clip_model.encode_image(images)
             image_features /= image_features.norm(dim=-1, keepdim=True)
         return image_features
+    
+    def filter_similar_inner(self,existing,token):
+        if token == '':
+            return False
+        
+        for s in existing:
+            if fuzz.ratio(s,token) > self.config.fuzz_ratio:
+                return False
+        
+        return True
+    def filter_similar(self,existing_list):
+        new_list = []
+
+        for s in existing_list:
+            if self.filter_similar_inner(new_list,s):
+                new_list.append(s)
+
+        return new_list
 
     def interrogate_classic(self, caption: str, image: Image, max_flavors: int=3) -> str:
         image_features = self.image_to_features(image)
@@ -165,7 +212,7 @@ class Interrogator():
             movement = ''
 
         if self.config.captionr_config.clip_flavor:
-            flaves = ", ".join(self.flavors.rank(image_features, max_flavors))
+            flaves = ", ".join(self.filter_similar(self.flavors.rank(image_features, max_flavors*2))[:max_flavors])
         else:
             flaves = ''
 
@@ -191,14 +238,17 @@ class Interrogator():
             tables.append(self.trendings)
 
         merged = _merge_tables(tables, self.config)
-        tops = merged.rank(image_features, max_flavors)
+        tops = merged.rank(image_features, max_flavors*4)
+        tops = self.filter_similar(tops)[:max_flavors]
+
         return _truncate_to_fit(caption + ", " + ", ".join(tops), self.tokenize)
 
     def interrogate(self, caption: str, image: Image, max_flavors: int=32) -> str:
         image_features = self.image_to_features(image)
 
         if self.config.captionr_config.clip_flavor:
-            flaves = self.flavors.rank(image_features, self.config.flavor_intermediate_count)
+            flaves = self.flavors.rank(image_features, self.config.flavor_intermediate_count*2)
+            flaves = self.filter_similar(flaves)[:self.config.flavor_intermediate_count]
         else:
             flaves = ''
         if self.config.captionr_config.clip_medium:

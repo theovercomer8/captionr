@@ -1,9 +1,14 @@
 # captionr
 COCA/GIT/BLIP/CLIP Caption tool as a Colab notebook and Python script
 
+## New Feature! 
+Similarity matching for tags will now eliminate dupliciate sounding tags resulting from CLIP interrogation. This affects interrogation when using the interrogate_classic and interrogate_fast methods. In addition, the uniquify_tags feature will also eliminate any similar tags. This can be useful when running CLIP flavors on existing caption files that include tags.
+
 ### CHANGELOG:
+* Notebook v0.3.0 - Added similarity matching UI support
+* Captionr.py v0.3.0 - Added similarity matching when uniquifying tags
 * Notebook v0.2.4 - Added caption editor widget
-* Caption.py v0.2.1 - Added experimental BLIP2 questions support
+* Captionr.py v0.2.1 - Added experimental BLIP2 questions support
 * Notebook v0.2.3 - Added experimental BLIP2 questions support
 * Notebook v0.2.2 - Added BLIP2 support
 * Captionr.py v0.2.0 - Added BLIP2 support
@@ -72,7 +77,7 @@ optional arguments:
                         Number of BLIP beams (default: 64)
   --blip_min BLIP_MIN   BLIP min length (default: 30)
   --blip_max BLIP_MAX   BLIP max length (default: 75)
-  --clip_model_name {ViT-H-14/laion2b_s32b_b79k,ViT-L-14/openai}
+  --clip_model_name {ViT-H-14/laion2b_s32b_b79k,ViT-L-14/openai,ViT-bigG-14/laion2b_s39b_b160k}
                         CLIP model to use. Use ViT-H for SD 2.x, ViT-L for SD 1.5 (default: ViT-H-14/laion2b_s32b_b79k)
   --clip_flavor         Add CLIP Flavors
   --clip_max_flavors CLIP_MAX_FLAVORS
@@ -95,6 +100,8 @@ optional arguments:
   --folder_tag_stop FOLDER_TAG_STOP
                         Do not tag folders any deeper than this path. Overrides --folder_tag_levels if --folder_tag_stop is shallower
   --uniquify_tags       Ensure tags are unique
+  --fuzz_ratio FUZZ_RATIO
+                        Sets the similarity ratio allowed for tags when uniquifying (default: 60.0)
   --prepend_text PREPEND_TEXT
                         Prepend text to final caption
   --append_text APPEND_TEXT
@@ -108,11 +115,9 @@ optional arguments:
   --debug
   ```
 
-## BLIP2 Questions
-You can now pass a question file to BLIP2 to add answers to tags with the `--blip2_question_file` param. See `example_blip2_questions.txt`. So far, results aren't great. Ideas/suggestions on how to improve this feature are encouraged.
 
 ## Special Thanks
-* @cacoe for the inception of the idea. Be sure to check out his new [IlluminatiAI model](https://huggingface.co/IlluminatiAI/Illuminati_Diffusion_v1.0). It slaps.
+* @cacoe for the inception of the idea. Be sure to check out his new [IlluminatiAI model v1.1](https://civitai.com/models/11193/illuminati-diffusion-v11). It slaps.
 * @Kaz, @jvkas, and @PeePa for help with testing
 * @Stille Willem and @NimbusFPV for the blunts
 

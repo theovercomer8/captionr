@@ -9,7 +9,7 @@ from captionr.coca_cap import Coca
 from captionr.git_cap import Git
 import torch
 import re
-import sys
+from thefuzz import fuzz
 
 @dataclass
 class CaptionrConfig:
@@ -53,7 +53,7 @@ class CaptionrConfig:
     quiet = False
     debug = False
     base_path = os.path.dirname(__file__)
-
+    fuzz_ratio = 60.0
     _blip:BLIP = None
     _clip:Interrogator = None
     _coca:Coca = None
@@ -103,7 +103,7 @@ class Captionr:
                 
                 # Create tag list
                 out_tags = []
-                new_caption = ''
+                new_caption = existing_caption
                 
                 got_cap = False
                 for m in config.model_order.split(','):
@@ -189,8 +189,15 @@ class Captionr:
 
                 if config.uniquify_tags:
                     for tag in out_tags:
-                        if not tag.strip() in unique_tags and not "_\(" in tag and  tag.strip() not in tags_to_ignore:
-                            unique_tags.append(tag.replace('"','').strip())
+                        tstr = tag.strip()
+                        if not tstr in unique_tags and not "_\(" in tag and  tstr not in tags_to_ignore:
+                            should_append = True
+                            for s in unique_tags:
+                                if fuzz.ratio(s,tstr) > self.config.fuzz_ratio:
+                                    should_append = False
+                                    break
+                            if should_append:
+                                unique_tags.append(tag.replace('"','').strip())
                 else:
                     for tag in out_tags:
                         if not "_\(" in tag and tag.strip() not in tags_to_ignore:

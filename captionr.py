@@ -93,7 +93,7 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('--clip_model_name',
                         help='CLIP model to use. Use ViT-H for SD 2.x, ViT-L for SD 1.5 (default: ViT-H-14/laion2b_s32b_b79k)',
                         default='ViT-H-14/laion2b_s32b_b79k',
-                        choices=['ViT-H-14/laion2b_s32b_b79k','ViT-L-14/openai']
+                        choices=['ViT-H-14/laion2b_s32b_b79k','ViT-L-14/openai','ViT-bigG-14/laion2b_s39b_b160k']
                         )
     parser.add_argument('--clip_flavor',
                         help='Add CLIP Flavors',
@@ -154,6 +154,11 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('--uniquify_tags',
                         help='Ensure tags are unique',
                         action='store_true'
+                        )
+    parser.add_argument('--fuzz_ratio',
+                        help='Sets the similarity ratio allowed for tags when uniquifying. If a tag is more than --fuzz_ratio similar to another tag, it will be eliminated. (default: 60.0)',
+                        type=float,
+                        default=60.0
                         )
     parser.add_argument('--prepend_text',
                         help='Prepend text to final caption',
@@ -294,7 +299,7 @@ def main() -> None:
                     cap_file = os.path.join(folder.absolute(),os.path.splitext(os.path.split(name)[1])[0] + f'.{config.extension}')
                 if not config.existing == 'skip' or not os.path.exists(cap_file):
                     paths.append(os.path.join(root, name))
-                else:
+                elif not config.quiet:
                     logging.info(f'Caption file {cap_file} exists. Skipping.')
     for path in tqdm(paths):
         cptr.process_img(path)
