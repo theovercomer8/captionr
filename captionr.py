@@ -12,8 +12,22 @@ from captionr.clip_interrogator import Interrogator, Config
 from captionr.coca_cap import Coca
 from captionr.git_cap import Git
 from captionr.captionr_class import CaptionrConfig, Captionr
-from tqdm import tqdm
+import tqdm
 
+from tqdm.contrib.concurrent import process_map  # or thread_map
+from multiprocessing import set_start_method
+
+class TqdmLoggingHandler(logging.Handler):
+    def __init__(self, level=logging.NOTSET):
+        super().__init__(level)
+
+    def emit(self, record):
+        try:
+            msg = self.format(record)
+            tqdm.tqdm.write(msg)
+            self.flush()
+        except Exception:
+            self.handleError(record) 
 
 config:CaptionrConfig = None
 
@@ -39,7 +53,7 @@ def init_argparse() -> argparse.ArgumentParser:
                         )
     parser.add_argument('--existing',
                         help='Action to take for existing caption files (default: skip)',
-                        choices=['skip','ignore','copy','prepend','append'],
+                        choices=['skip','ignore','copy','prepend','append', 'flavor'],
                         default='skip'
                         )
     parser.add_argument('--cap_length',
@@ -151,6 +165,11 @@ def init_argparse() -> argparse.ArgumentParser:
                         help='Do not tag folders any deeper than this path. Overrides --folder_tag_levels if --folder_tag_stop is shallower',
                         type=pathlib.Path,
                         )
+    parser.add_argument('--folder_tag_position',
+                        help='What positino to insert folder tags into the tag list. (default: 1)',
+                        type=int,
+                        default=1,
+                        )
     parser.add_argument('--uniquify_tags',
                         help='Ensure tags are unique',
                         action='store_true'
@@ -184,6 +203,11 @@ def init_argparse() -> argparse.ArgumentParser:
                         choices=['txt','caption'],
                         default='txt'
                         )
+    parser.add_argument('--num_workers',
+                        help='Number of processes to spawn. Lower to reduce VRAM issues. (default: 8)',
+                        default=8,
+                        type=int
+                        )
     parser.add_argument('--quiet',
                         action='store_true'
                         )
@@ -198,6 +222,7 @@ def main() -> None:
     parser = init_argparse()
     config = parser.parse_args()
     config.base_path = os.path.dirname(os.path.abspath(__file__))
+
     if config.debug:
         logging.basicConfig(level=logging.DEBUG)
         logging.debug(config)
@@ -206,6 +231,9 @@ def main() -> None:
     else:
         logging.basicConfig(level=logging.INFO)
 
+
+    log = logging.getLogger(__name__)
+    log.addHandler(TqdmLoggingHandler())
 
     if len(config.folder) == 0:
         parser.error('Folder is required.')
@@ -293,7 +321,7 @@ def main() -> None:
         for root, dirs, files in os.walk(folder.absolute(), topdown=False):
             for name in files:
                 
-                if os.path.splitext(os.path.split(name)[1])[1].upper() not in ['.JPEG','.JPG','.JPE', '.PNG']:
+                if os.path.splitext(os.path.split(name)[1])[1].upper() not in ['.JPEG','.JPG','.JPE', '.PNG', '.WEBP']:
                     continue
                 if config.extension not in os.path.splitext(os.path.split(name)[1])[1]:
                     cap_file = os.path.join(folder.absolute(),os.path.splitext(os.path.split(name)[1])[0] + f'.{config.extension}')
@@ -301,10 +329,20 @@ def main() -> None:
                     paths.append(os.path.join(root, name))
                 elif not config.quiet:
                     logging.info(f'Caption file {cap_file} exists. Skipping.')
-    for path in tqdm(paths):
-        cptr.process_img(path)
+    
+    def calc_chunksize(n_workers, len_iterable, factor=4):
+        chunksize, extra = divmod(len_iterable, n_workers * factor)
+        if extra:
+            chunksize += 1
+        return chunksize
+    
+    process_map(cptr.process_img, paths, max_workers=config.num_workers,chunksize=calc_chunksize(config.num_workers,len(paths)))
+
+    # for path in tqdm(paths):
+    #     cptr.process_img(path)
 
 if __name__ == "__main__":
-   main()
+    set_start_method('spawn')
+    main()
 
     

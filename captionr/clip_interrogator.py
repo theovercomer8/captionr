@@ -8,7 +8,7 @@ import time
 import torch
 from dataclasses import dataclass
 from PIL import Image
-from tqdm import tqdm
+import tqdm
 from typing import List
 import logging
 import requests
@@ -31,12 +31,13 @@ class Config:
     data_path: str = os.path.join(os.path.dirname(__file__), 'data')
     device: str = ("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
     flavor_intermediate_count: int = 2048
-    quiet: bool = False # when quiet progress bars are not shown
+    quiet: bool = True # when quiet progress bars are not shown
 
     fuzz_ratio: int = 50
 
 class Interrogator():
     def __init__(self, config: Config):
+        config.quiet = True
         self.config = config
         self.device = config.device
         self.config.chunk_size = 2048 if config.clip_model_name == 'ViT-L-14/openai' else 1024
@@ -74,7 +75,7 @@ class Interrogator():
                         for chunk in r.iter_content(chunk_size=128):
                             fd.write(chunk)
             elif config.clip_model_name == 'ViT-bigG-14/openai':
-                print('No cache items to preload')
+                logging.info('No cache items to preload')
                 # if not os.path.exists(os.path.join(config.cache_path,'ViT-bigG-14_openai_flavors.pkl')):
                 #     r = requests.get('https://github.com/theovercomer8/captionr/raw/main/data/ViT-L-14_openai_flavors.pkl', stream=True)
                 #     with open(os.path.join(config.cache_path,'ViT-L-14_openai_flavors.pkl'), 'wb') as fd:
@@ -300,7 +301,7 @@ class Interrogator():
         check_multi_batch([best_medium, best_artist, best_trending, best_movement])
 
         extended_flavors = set(flaves)
-        for _ in tqdm(range(max_flavors), desc="Flavor chain", disable=self.config.quiet):
+        for _ in tqdm.tqdm(range(max_flavors), desc="Flavor chain", disable=self.config.quiet):
             best = self.rank_top(image_features, [f"{best_prompt}, {f}" for f in extended_flavors])
             flave = best[len(best_prompt)+2:]
             if not check(flave):
@@ -357,7 +358,7 @@ class LabelTable():
         if len(self.labels) != len(self.embeds):
             self.embeds = []
             chunks = np.array_split(self.labels, max(1, len(self.labels)/config.chunk_size))
-            for chunk in tqdm(chunks, desc=f"Preprocessing {desc}" if desc else None, disable=self.config.quiet):
+            for chunk in tqdm.tqdm(chunks, desc=f"Preprocessing {desc}" if desc else None, disable=self.config.quiet):
                 text_tokens = self.tokenize(chunk).to(self.device)
                 with torch.no_grad(), torch.cuda.amp.autocast():
                     text_features = clip_model.encode_text(text_tokens)
@@ -395,7 +396,7 @@ class LabelTable():
         keep_per_chunk = int(self.chunk_size / num_chunks)
 
         top_labels, top_embeds = [], []
-        for chunk_idx in tqdm(range(num_chunks), disable=self.config.quiet):
+        for chunk_idx in tqdm.tqdm(range(num_chunks), disable=self.config.quiet):
             start = chunk_idx*self.chunk_size
             stop = min(start+self.chunk_size, len(self.embeds))
             tops = self._rank(image_features, self.embeds[start:stop], top_count=keep_per_chunk)

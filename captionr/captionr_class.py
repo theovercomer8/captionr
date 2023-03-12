@@ -43,6 +43,7 @@ class CaptionrConfig:
     folder_tag = False
     folder_tag_levels = 1
     folder_tag_stop: pathlib.Path = None
+    folder_tag_position = 1
     preview = False
     use_filename = False
     append_text = ''
@@ -54,6 +55,7 @@ class CaptionrConfig:
     debug = False
     base_path = os.path.dirname(__file__)
     fuzz_ratio = 60.0
+    num_workers = 8
     _blip:BLIP = None
     _clip:Interrogator = None
     _coca:Coca = None
@@ -106,46 +108,47 @@ class Captionr:
                 new_caption = existing_caption
                 
                 got_cap = False
-                for m in config.model_order.split(','):
-                    if m == 'git' and config.git_pass and config._git is not None and not got_cap:
-                        logging.debug('Getting GIT caption')
-                        try:
-                            new_caption = config._git.caption(img)
-                        except:
-                            logging.exception("Exception during GIT captioning")
-                            continue
-                        logging.debug(f'GIT Caption: {new_caption}')
-                        if any(f in new_caption for f in config.fail_phrases.split(',')):
-                            logging.info(f'GIT caption was\n{new_caption}\nFail phrases detected.')
-                        else:
-                            got_cap = True
-                            break
-                    elif m == 'coca' and config.coca_pass and config._coca is not None and not got_cap:
-                        logging.debug('Getting Coca caption')
-                        try:
-                            new_caption = config._coca.caption(img)
-                        except:
-                            logging.exception("Exception during Coca captioning")
-                            continue
-                        logging.debug(f'Coca Caption: {new_caption}')
-                        if any(f in new_caption for f in config.fail_phrases.split(',')):
-                            logging.info(f'Coca caption was\n{new_caption}\nFail phrases detected.')
-                        else:
-                            got_cap = True
-                            break
-                    elif m == 'blip' and config.blip_pass and config._blip is not None and not got_cap:
-                        logging.debug('Getting BLIP caption')
-                        try:
-                            new_caption = config._blip.caption(img)
-                        except:
-                            logging.exception("Exception during BLIP captioning")
-                            continue
-                        logging.debug(f'BLIP Caption: {new_caption}')
-                        if any(f in new_caption for f in config.fail_phrases.split(',')):
-                            logging.info(f'BLIP caption was\n{new_caption}\nFail phrases detected.')
-                        else:
-                            got_cap = True
-                            break
+                if existing_caption == '' or config.existing != 'flavor':
+                    for m in config.model_order.split(','):
+                        if m == 'git' and config.git_pass and config._git is not None and not got_cap:
+                            logging.debug('Getting GIT caption')
+                            try:
+                                new_caption = config._git.caption(img)
+                            except:
+                                logging.exception("Exception during GIT captioning")
+                                continue
+                            logging.debug(f'GIT Caption: {new_caption}')
+                            if any(f in new_caption for f in config.fail_phrases.split(',')):
+                                logging.info(f'GIT caption was\n{new_caption}\nFail phrases detected.')
+                            else:
+                                got_cap = True
+                                break
+                        elif m == 'coca' and config.coca_pass and config._coca is not None and not got_cap:
+                            logging.debug('Getting Coca caption')
+                            try:
+                                new_caption = config._coca.caption(img)
+                            except:
+                                logging.exception("Exception during Coca captioning")
+                                continue
+                            logging.debug(f'Coca Caption: {new_caption}')
+                            if any(f in new_caption for f in config.fail_phrases.split(',')):
+                                logging.info(f'Coca caption was\n{new_caption}\nFail phrases detected.')
+                            else:
+                                got_cap = True
+                                break
+                        elif m == 'blip' and config.blip_pass and config._blip is not None and not got_cap:
+                            logging.debug('Getting BLIP caption')
+                            try:
+                                new_caption = config._blip.caption(img)
+                            except:
+                                logging.exception("Exception during BLIP captioning")
+                                continue
+                            logging.debug(f'BLIP Caption: {new_caption}')
+                            if any(f in new_caption for f in config.fail_phrases.split(',')):
+                                logging.info(f'BLIP caption was\n{new_caption}\nFail phrases detected.')
+                            else:
+                                got_cap = True
+                                break
                 
                 # Strip period from end of caption
                 matches = re.match('^.+(\s+\.\s*)$',new_caption)
@@ -176,7 +179,10 @@ class Captionr:
                 if config.folder_tag:
                     folder_tags = self.get_parent_folder(img_path,config.folder_tag_levels)
                     for tag in folder_tags:
-                        out_tags.append(tag.strip())
+                        if len(out_tags) < config.folder_tag_position:
+                            out_tags.append(tag.strip())
+                        else:
+                            out_tags.insert(config.folder_tag_position,tag.strip())
 
                 # Remove duplicates, filter dumb stuff
                 # chars_to_strip = ["_\\("]
