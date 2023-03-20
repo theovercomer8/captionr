@@ -28,7 +28,6 @@ Feature requests? Support? Find me on the [IlluminatiAI Discord](https://discord
 <img width="336" alt="image" src="https://user-images.githubusercontent.com/122644869/217713111-9325216e-d6a2-43a5-8e1a-d56243aca5cb.png">
 
 ## To use the script:
-The salesforce-lavis module required to use BLIP2 is not compatible with Python 3.9 or higher. It is recommended that you install Python 3.8 if you are currently using 3.9 or higher. It is recommended to use a tool like [Pyenv](https://github.com/pyenv/pyenv) to install/manage older Python versions if you are not experienced with doing so.
 
 **Warning:** Using BLIP2 will take up a large amount of disk space. Users have reported as much as 45GB. In addition, the VRAM requirement is minimum 24GB.
 
