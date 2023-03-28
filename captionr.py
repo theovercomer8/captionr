@@ -82,8 +82,8 @@ def init_argparse() -> argparse.ArgumentParser:
                         action='store_true')
     parser.add_argument('--blip2_model',
                         help='Specify the BLIP2 model to use',
-                        choices=['blip2_t5/pretrain_flant5xxl','blip2_opt/pretrain_opt2.7b', 'blip2_opt/pretrain_opt6.7b', 'blip2_opt/caption_coco_opt2.7b', 'blip2_opt/caption_coco_opt6.7b', 'blip2_t5/pretrain_flant5xl', 'blip2_t5/caption_coco_flant5xl'],
-                        default='blip2_t5/pretrain_flant5xxl'
+                        choices=['Salesforce/blip2-opt-6.7b-coco','Salesforce/blip2-opt-2.7b-coco', 'Salesforce/blip2-opt-2.7b', 'Salesforce/blip2-opt-6.7b', 'Salesforce/blip2-flan-t5-xl-coco', 'ethzanalytics/blip2-flan-t5-xl-sharded', 'Salesforce/blip2-flan-t5-xxl','Salesforce/blip2-flan-t5-xl'],
+                        default='Salesforce/blip2-opt-6.7b-coco'
                         )
     parser.add_argument('--blip2_question_file',
                         help='Specify a question file to use to query BLIP2 and add answers as tags',

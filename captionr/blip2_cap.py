@@ -1,4 +1,5 @@
-from lavis.models import load_model_and_preprocess
+import torch
+from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from PIL import Image
 
 class BLIP2:
@@ -11,15 +12,18 @@ class BLIP2:
         self.device = device
         self.max_length = max_length
         name, model_type = self.model_name.split('/')
-        self.model, self.processor, _ = load_model_and_preprocess(
-            name=name, model_type=model_type, is_eval=True, device=device
-        )
+        self.processor = Blip2Processor.from_pretrained(self.model_name)
+        self.model = Blip2ForConditionalGeneration.from_pretrained(self.model_name, torch_dtype=torch.float16).to(self.device)
         
     
     
     def caption(self,img:Image) -> str:
-        image = self.processor["eval"](img).unsqueeze(0).to(self.device)
-        return self.model.generate({"image": image})[0]
+
+        inputs = self.processor(images=img, return_tensors="pt").to(self.device, torch.float16)
+
+        generated_ids = self.model.generate(**inputs)
+        generated_text = self.processor.batch_decode(generated_ids, skip_special_tokens=True)[0].strip()
+        return generated_text
     
     def question(self,img:Image,question:str) -> str:
         q = f"Question: {question} Answer:"
@@ -28,5 +32,3 @@ class BLIP2:
             reply = reply[0]
         reply = reply.replace(q,'')
         return reply
-
-     
