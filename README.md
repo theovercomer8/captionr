@@ -16,7 +16,7 @@ Similarity matching for tags will now eliminate dupliciate sounding tags resulti
 * Notebook v0.2.0 - Refactored to support new captionr.py module
 * Captionr.py v0.1.0 - Initial release of local script
 
-Feature requests? Support? Find me on the [IlluminatiAI Discord](https://discord.gg/HqdffGgeBa)
+Feature requests? Support? Find me on the [FinetunerAI Labs Discord](https://discord.gg/t3SJbJPcwv)
 
 ## To use the notebook:
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/theovercomer8/captionr/blob/main/TO8_Captionr.ipynb)
