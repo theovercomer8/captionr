@@ -11,6 +11,7 @@ from captionr.blip2_cap import BLIP2
 from captionr.clip_interrogator import Interrogator, Config
 from captionr.coca_cap import Coca
 from captionr.git_cap import Git
+from captionr.flamingo_cap import Flamingo
 from captionr.captionr_class import CaptionrConfig, Captionr
 import tqdm
 
@@ -214,6 +215,25 @@ def init_argparse() -> argparse.ArgumentParser:
     parser.add_argument('--debug',
                         action='store_true'
                         )
+    parser.add_argument('--flamingo_pass',
+                        help='Perform a Flamingo model pass',
+                        action='store_true',
+                        )
+    parser.add_argument("--flamingo_model", 
+                        type=str, 
+                        default="openflamingo/OpenFlamingo-9B-vitl-mpt7b", 
+                        choices=['openflamingo/OpenFlamingo-9B-vitl-mpt7b','openflamingo/OpenFlamingo-3B-vitl-mpt1b','openflamingo/OpenFlamingo-4B-vitl-rpj3b'],
+                        help="Flamingo model name")
+    parser.add_argument("--flamingo_min_new_tokens", type=int, default=20, help="minimum number of tokens to generate")
+    parser.add_argument("--flamingo_max_new_tokens", type=int, default=50, help="maximum number of tokens to generate")
+    parser.add_argument("--flamingo_num_beams", type=int, default=3, help="number of beams, more is more accurate but slower")
+    parser.add_argument("--flamingo_prompt", type=str, default="Output: ", help="prompt to use for generation, default is 'Output: '")
+    parser.add_argument("--flamingo_temperature", type=float, default=1.0, help="temperature for sampling, 1.0 is default")
+    parser.add_argument("--flamingo_top_k", type=int, default=0, help="top_k sampling, 0 is default")
+    parser.add_argument("--flamingo_top_p", type=float, default=0.9, help="top_p sampling, 0.9 is default")
+    parser.add_argument("--flamingo_repetition_penalty", type=float, default=1.0, help="repetition penalty, 1.0 is default")
+    parser.add_argument("--flamingo_length_penalty", type=float, default=1.0, help="length penalty, 1.0 is default")
+    parser.add_argument("--flamingo_example_root", type=pathlib.Path, default="examples", help="Path to 2-3 precaptioned images to guide generation") 
     
     return parser
 
@@ -256,7 +276,8 @@ def main() -> None:
             and not config.clip_artist \
             and not config.clip_medium \
             and not config.clip_movement \
-            and not config.clip_trending:
+            and not config.clip_trending \
+            and not config.flamingo_pass:
         if config.existing == 'skip' \
             and  ( \
                 ( \
@@ -305,13 +326,17 @@ def main() -> None:
             config._blip = BLIP(config.device,beams=config.blip_beams,blip_max=config.blip_max, blip_min=config.blip_min)
 
 
+    if config.flamingo_pass:
+        logging.info("Loading Flamingo Model...")
+        config._flamingo = Flamingo(config.device, config.flamingo_model, config.flamingo_example_root, config.flamingo_min_new_tokens, config.flamingo_max_new_tokens, config.flamingo_num_beams,config.flamingo_temperature, config.flamingo_prompt, config.flamingo_top_k, config.flamingo_top_p, config.flamingo_repetition_penalty, config.flamingo_length_penalty)
+        
     if config.clip_artist or config.clip_flavor or config.clip_medium or config.clip_movement or config.clip_trending:
         logging.info("Loading Clip Model...")
         config._clip = Interrogator(Config(clip_model_name=config.clip_model_name,
-                                           captionr_config=config,
-                                           quiet=config.quiet,
-                                           data_path=os.path.join(config.base_path,'data'),
-                                           cache_path=os.path.join(config.base_path,'data')))
+                                    captionr_config=config,
+                                    quiet=config.quiet,
+                                    data_path=os.path.join(config.base_path,'data'),
+                                    cache_path=os.path.join(config.base_path,'data')))
         
     if config.preview:
         logging.info('PREVIEW MODE ENABLED. No caption files will be written.')

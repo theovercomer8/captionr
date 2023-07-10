@@ -7,6 +7,7 @@ from captionr.blip_cap import BLIP
 from captionr.clip_interrogator import Interrogator, Config
 from captionr.coca_cap import Coca
 from captionr.git_cap import Git
+from captionr.flamingo_cap import Flamingo
 import torch
 import re
 from thefuzz import fuzz
@@ -56,11 +57,23 @@ class CaptionrConfig:
     base_path = os.path.dirname(__file__)
     fuzz_ratio = 60.0
     num_workers = 8
+    flamingo_pass = False
+    flamingo_model = None
+    flamingo_min_new_tokens = 20
+    flamingo_max_new_tokens = 50
+    flamingo_num_beams = 3
+    flamingo_prompt = 'Output: '
+    flamingo_temperature = 1.0
+    flamingo_top_k = 0
+    flamingo_top_p = 0.9
+    flamingo_repeition_penalty = 1.0
+    flamingo_length_penalty = 1.0
+    flamingo_example_root = None
     _blip:BLIP = None
     _clip:Interrogator = None
     _coca:Coca = None
     _git:Git = None
-
+    _flamingo:Flamingo = None
 
 class Captionr:
     def __init__(self, config:CaptionrConfig) -> None:
@@ -149,7 +162,20 @@ class Captionr:
                             else:
                                 got_cap = True
                                 break
-                
+                        elif m == 'flamingo' and config.flamingo_pass and config._flamingo is not None and not got_cap:
+                            logging.debug('Getting Flamingo caption')
+                            try:
+                                new_caption = config._flamingo.caption(img)
+                            except:
+                                logging.exception("Exception during Flamingo captioning")
+                                continue
+                            logging.debug(f'Flamingo Caption: {new_caption}')
+                            if any(f in new_caption for f in config.fail_phrases.split(',')):
+                                logging.info(f'Flamingo caption was\n{new_caption}\nFail phrases detected.')
+                            else:
+                                got_cap = True
+                                break
+                            
                 # Strip period from end of caption
                 matches = re.match('^.+(\s+\.\s*)$',new_caption)
                 if matches is not None:
